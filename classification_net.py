@@ -16,7 +16,7 @@ class ClassificationNetwork:
         """
         self.__activation_function = activation_function
         self.__layers = []
-        for i in range(length(nodes_per_layer)-1)
+        for i in range(length(nodes_layer)-1)
             self.__layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
     
     def train_network(self, image_data, labels):
@@ -24,13 +24,13 @@ class ClassificationNetwork:
         self.__propagate_backward(prop_fwd, labels)
 
     def get_prediction(self,image_data):
-        return np.around(self.__propagate_forward(image_data))
+        return np.around(self.__propagate_forward(image_data)[-1])
     
     def __propagate_forward(self, image_data):
-        activation = image_data
+        activation = [image_data]
         for layer in layers:
-            activation = self.__activation_function(activation.dot(layer.weights) + layer.biases)
+            activation.append(self.__activation_function(activation.dot(layer.weights) + layer.biases))
         return activation
 
     def __propagate_backward(self, predictions, labels):
-        """Still need to implement."""
+        
