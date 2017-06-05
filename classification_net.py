@@ -1,34 +1,36 @@
 import numpy as np
 import preprocess
+import weight_layer as wl
 
 class ClassificationNetwork:
-    def __init__(self,num_inputs,num_classes,num_hidden_layers,nodes_per_layer):
-        self.num_layers = num_hidden_layers
-        self.weights = allocate_inital_weights(num_hidden_layers,\
-                                            num_inputs,num_classes)
+    def __init__(self, nodes_layer, activation_function):
+        """
+        nodes_layer is a list in which each value is the amount of nodes for that particular layer
 
-    def forward_propagation(self,image_data):
-        activations = []
-        activations.append(np.concatenate((np.array([1]),image_data)))
-        for i in range(0,self.num_layers+1):
-            curr_layer = activations[-1].transpose()
-            z = self.weights[i].dot(curr_layer)
-            activations.append(sigmoid_function(z))
-        return activations
+            i.e. [5, 20, 1], would have an input layer of 5 nodes, hidden layer of 20 nodes,
+                and output layer of 1 node.
+        
 
+        activation_function is a delegate to an activation function used for forward propagation.
+        
+        """
+        self.__activation_function = activation_function
+        self.__layers = []
+        for i in range(length(nodes_per_layer)-1)
+            self.__layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
+    
+    def train_network(self, image_data, labels):
+        prop_fwd = self.__propagate_forward(image_data)
+        self.__propagate_backward(prop_fwd, labels)
 
-    def sigmoid_function(z):
-        return 1. / (1. + np.exp(-z))
+    def get_prediction(self,image_data):
+        return np.around(self.__propagate_forward(image_data))
+    
+    def __propagate_forward(self, image_data):
+        activation = image_data
+        for layer in layers:
+            activation = self.__activation_function(activation.dot(layer.weights) + layer.biases)
+        return activation
 
-    def allocate_inital_weights(num_hidden_layers,num_inputs,num_classes):
-        weights = []
-        for i in range(0,num_layers):
-            if i == 0:
-                weights.append(np.random.randn(nodes_per_layer,\
-                                                    num_inputs + 1))
-            else:
-                weights.append(np.random.randn(nodes_per_layer,\
-                                                nodes_per_layer + 1))
-        self.weights.append(np.random.randn(num_classes,nodes_per_layer + 1))
-
-        return weights
+    def __propagate_backward(self, predictions, labels):
+        """Still need to implement."""
