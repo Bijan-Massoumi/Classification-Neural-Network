@@ -6,5 +6,6 @@ import preprocess as p
 if __name__ == "__main__":
     train,target = p.load_images('train.csv')
     net = cn.ClassificationNetwork([train.shape[1],25,10],Activations.sigmoid)
-    image = train[0]
-    print(net.propagate_forward(image)[-1])
+    images = train[0]
+    targets = target[0]
+    print(len(net.layers))

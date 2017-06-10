@@ -8,8 +8,7 @@ class WeightLayer:
         if num_prev_nodes == 0:
             raise ValueError('Invalid number of nodes in previous layer')
         self.num_nodes = num_nodes
-        biases = np.zeros((num_nodes,1))
-        self.weights = np.c_[biases , \
-            np.random.randn(num_nodes,num_prev_nodes) / np.sqrt(num_nodes)]
+        self.biases = np.random.randn(num_nodes)
+        self.weights = np.random.randn(num_nodes,num_prev_nodes) / np.sqrt(num_nodes)
         
         
