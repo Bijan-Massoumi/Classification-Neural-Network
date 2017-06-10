@@ -15,22 +15,25 @@ class ClassificationNetwork:
         
         """
         self.__activation_function = activation_function
-        self.__layers = []
-        for i in range(length(nodes_layer)-1)
-            self.__layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
+        self.layers = []
+        for i in range(len(nodes_layer)-1):
+            self.layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
     
     def train_network(self, image_data, labels):
-        prop_fwd = self.__propagate_forward(image_data)
-        self.__propagate_backward(prop_fwd, labels)
+        prop_fwd = self.propagate_forward(image_data)
+        self.propagate_backward(prop_fwd, labels)
 
     def get_prediction(self,image_data):
         return np.around(self.__propagate_forward(image_data)[-1])
     
-    def __propagate_forward(self, image_data):
+    def propagate_forward(self, image_data):
         activation = [image_data]
-        for layer in layers:
-            activation.append(self.__activation_function(activation.dot(layer.weights) + layer.biases))
+        for layer in self.layers:
+            # adding 1 for bias compuation 1 * bias collumn in the dot compuation
+            print(activation[-1].shape)
+            current_a = np.concatenate([np.array([1]), activation[-1]])
+            activation.append(self.__activation_function(layer.weights.dot(current_a)))
         return activation
 
-    def __propagate_backward(self, predictions, labels):
-        
+    def propagate_backward(self, predictions, labels):
+        print(None)
