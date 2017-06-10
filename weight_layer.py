@@ -7,8 +7,7 @@ class WeightLayer:
         #adding an extra column to weights because im combining the biases into the weight matrix
         if num_prev_nodes == 0:
             raise ValueError('Invalid number of nodes in previous layer')
-        self.num_nodes = num_nodes
-        self.biases = np.random.randn(num_nodes)
-        self.weights = np.random.randn(num_nodes,num_prev_nodes) / np.sqrt(num_nodes)
+        self.biases = np.zeros((1, num_nodes))
+        self.weights = np.random.randn(num_prev_nodes, num_nodes) / np.sqrt(num_prev_nodes)
         
         

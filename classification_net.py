@@ -3,7 +3,7 @@ import preprocess
 import weight_layer as wl
 
 class ClassificationNetwork:
-    def __init__(self, nodes_layer, activation_function):
+    def __init__(self, nodes_layer, activation_function, reg_strength, learning_rate):
         """
         nodes_layer is a list in which each value is the amount of nodes for that particular layer
 
@@ -12,46 +12,49 @@ class ClassificationNetwork:
         
 
         activation_function is a delegate to an activation function used for forward propagation.
+
         
         """
         self.__activation_function = activation_function
+        self.__reg_strength = reg_strength
+        self.__learning_rate = learning_rate
         self.num_layers = len(nodes_layer)
         self.layers = []
         for i in range(len(nodes_layer)-1):
             self.layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
     
-    def train_network(self, image_data, labels):
-        for x,y in zip(image_data,labels):   
-            grad_b, grad_w = self.propagate_backward(x, y)
+    def train_network(self, images, targets):
+        for i in range(images.shape[0]):   
+            propagate_backward(images[i,:], targets[i,:])
 
-    def get_prediction(self,image_data):
-        return np.around(self.__propagate_forward(image_data)[-1])
-    
-    def propagate_forward(self, image_data):
-        activation = [image_data]
-        for layer in self.layers:
-            activation.append(self.__activation_function(np.dot(layer.weights ,\
-                                                activation[-1]) + layer.biases))
-        return activation
-
-    def propagate_backward(self, images, targets):
-        weight_deltas = []
-        bias_deltas = []
-        for layer in self.layers:
-            weight_deltas.append(np.zeros(shape = layer.weights.shape))
-            bias_deltas.append(np.zeros(shape = layer.biases.shape))
-            
-        
+    def propagate_backward(self, image, target, debug = False):
+        """ Propagate error back through network, updating weights """
         activations = self.propagate_forward(image)
-        bias_deltas = (activations[-1] - targets)
-        
-        #compute errors for each layer the loop condition revserses the list and excludes the ends of it
-        for i in range(num_activations-2,0,-1): 
-            bias_deltas[i]  = self.layers[i].weights.transpose().dot(bias_deltas[i+1])\
-                * (activations[i] * (1 - activations[i]))
-           
-        for i, delta in enumerate(total_deltas): #accumulate
-            total_deltas[i] = delta + bias_deltas[i+1].dot(activations[i].transpose())
-                
-        grad = list(map(lambda x: x * (1/len(images)), delta_totals ))          
-        return grad
+        delta = activations[-1] - target
+        if debug:
+            print(delta)
+        for i in reversed(range(len(self.layers))):
+            dW = np.dot(activations[i-1].T, delta) + (self.__reg_strength * self.layers[i])
+            dB = np.sum(delta, axis = 0, keepdims=True)
+            self.layers[i].weights -= (self.__learning_rate * dW)
+            self.layers[i].biases -= (self.__learning_rate * dB)
+            delta = delta * self.__activation_function(activations[i-1], True)
+
+    def get_prediction(self,image):
+        return np.around(self.propagate_forward(image_data)[-1])
+    
+    def propagate_forward(self, image):
+        """ Runs network forward and returns activations from layers """
+        activation = [image_data]
+        for layer in self.layers[:-1]:
+            activation.append(self.__activation_function(np.dot(activation[-1] ,\
+                                                layer.weights ) + layer.biases))
+        #Softmax activation in last layer for best results
+        activation.append(np.dot(activation[-1], self.layers[-1].weights) + \
+                                                self.layers[-1].biases)
+        return activation
+    
+    def softmax(z):
+        exp_result = np.exp(z)
+        return (exp_result / np.sum(exp_result, axis=1, keepdims=True))
+    
