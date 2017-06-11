@@ -12,7 +12,7 @@ class Activations(Enum):
             return (1. - np.power(self.tanh(z), 2))
         else:
             return np.tanh(z)
-    def relu(z, derivate = False):
+    def relu(self, z, derivate = False):
         if derivate:
             if z < 0:
                 return 0.

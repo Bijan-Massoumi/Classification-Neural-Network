@@ -30,17 +30,24 @@ class ClassificationNetwork:
         with open(path, "wb") as f:
             pickle.dump(self.layers, f)
     
-    def train_network(self, images, targets, epochs = 10, reg_strength = 0.01, learning_rate = 0.01, debug = False):
+    def train_network(self, images, targets, epochs, reg_strength, learning_rate, batch_size, momentum, debug):
         for epoch in range(epochs):
-            for i in range(images.shape[0]):   
-                self.propagate_backward(images[i,:], targets[i,:], reg_strength, learning_rate, debug)
+            sample = np.random.permutation(images.shape[0])
+            for i in range(images.shape[0] // batch_size)
+                index = sample[(i*batch_size):((i*batch_size)+batch_size)]  # Get batch_size random samples
+                self.propagate_backward(images[index,:], targets[index,:], reg_strength,\
+                                        learning_rate, momentum, debug)
+            if (images.shape[0] % batch_size) != 0: # Feed remaining samples through network
+                index = sample[-(images.shape[0] % batch_size):]
+                self.propagate_backward(images[index,:], targets[index,:], reg_strength,\
+                                        learning_rate, momentum, debug)
 
-    def propagate_backward(self, image, target, reg_strength, learning_rate, debug):
+    def propagate_backward(self, image, target, reg_strength, learning_rate, momentum, debug):
         """ Propagate error back through network, updating weights """
         activations = self.propagate_forward(image)
         delta = activations[-1] - target
         if debug:
-            print(delta)
+            print(sum(delta))
         for i in reversed(range(len(self.layers))):
             dW = np.dot(activations[i].T, delta) + (reg_strength * self.layers[i].weights)
             dB = np.sum(delta, axis=0, keepdims=True)
@@ -51,7 +58,7 @@ class ClassificationNetwork:
 
     def compute_accuracy(self, test_images, test_targets, threshold = 0.5):
         correct = 0
-        for i in range(test_images.shape[0]):   
+        for i in range(test_images.shape[0]):
             prediction = self.get_prediction(test_images[i,:])
             prediction = (prediction > threshold).astype(int)
             correct += np.array_equal(prediction, test_targets[i,:]) * 1.
@@ -65,7 +72,7 @@ class ClassificationNetwork:
         activation = [np.reshape(image,(1,image.shape[0]))]
         for layer in self.layers[:-1]:
             activation.append(self.__activation_function(self, np.dot(activation[-1] ,\
-                                                layer.weights ) + layer.biases, False))
+                                                layer.weights ) + layer.biases))
         #Softmax activation in last layer for best results
         activation.append(self.softmax(np.dot(activation[-1], self.layers[-1].weights) + \
                                                 self.layers[-1].biases))
