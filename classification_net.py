@@ -1,5 +1,5 @@
 import numpy as np
-import preprocess
+import pickle
 import weight_layer as wl
 
 class ClassificationNetwork:
@@ -13,7 +13,6 @@ class ClassificationNetwork:
 
         activation_function is a delegate to an activation function used for forward propagation.
 
-        
         """
         self.__activation_function = activation_function
         self.__reg_strength = reg_strength
@@ -22,6 +21,22 @@ class ClassificationNetwork:
         self.layers = []
         for i in range(len(nodes_layer)-1):
             self.layers.append(wl.WeightLayer(nodes_layer[i+1], nodes_layer[i]))
+
+    @staticmethod
+    def load_network(path, activation_function, reg_strength = 0.01, learning_rate = 0.01):
+        """Loads and returns serialized network with given activation function that trained this network."""
+        with open(path, "rb") as f:
+            layers = pickle.load(f)
+        nodes_layer = [layers[0].weights.shape[0]]
+        for layer in layers:
+            nodes_layer.append(layer.weights.shape[1])
+        network = ClassificationNetwork(nodes_layer, activation_function)
+        network.layers = layers
+        return network
+
+    def serialize_network(self, path):
+        with open(path, "wb") as f:
+            pickle.dump(self.layers, f)
     
     def train_network(self, images, targets):
         for i in range(images.shape[0]):   
@@ -35,7 +50,7 @@ class ClassificationNetwork:
             print(delta)
         for i in reversed(range(len(self.layers))):
             dW = np.dot(activations[i-1].T, delta) + (self.__reg_strength * self.layers[i])
-            dB = np.sum(delta, axis = 0, keepdims=True)
+            dB = np.sum(delta, axis=0, keepdims=True)
             self.layers[i].weights -= (self.__learning_rate * dW)
             self.layers[i].biases -= (self.__learning_rate * dB)
             delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
@@ -51,8 +66,8 @@ class ClassificationNetwork:
             activation.append(self.__activation_function(np.dot(activation[-1] ,\
                                                 layer.weights ) + layer.biases))
         #Softmax activation in last layer for best results
-        activation.append(np.dot(activation[-1], self.layers[-1].weights) + \
-                                                self.layers[-1].biases)
+        activation.append(softmax(np.dot(activation[-1], self.layers[-1].weights) + \
+                                                self.layers[-1].biases))
         return activation
     
     def softmax(z):
