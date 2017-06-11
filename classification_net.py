@@ -33,7 +33,7 @@ class ClassificationNetwork:
     def train_network(self, images, targets, epochs, reg_strength, learning_rate, batch_size, momentum, debug):
         for epoch in range(epochs):
             sample = np.random.permutation(images.shape[0])
-            for i in range(images.shape[0] // batch_size)
+            for i in range(images.shape[0] // batch_size):
                 index = sample[(i*batch_size):((i*batch_size)+batch_size)]  # Get batch_size random samples
                 self.propagate_backward(images[index,:], targets[index,:], reg_strength,\
                                         learning_rate, momentum, debug)
@@ -42,16 +42,16 @@ class ClassificationNetwork:
                 self.propagate_backward(images[index,:], targets[index,:], reg_strength,\
                                         learning_rate, momentum, debug)
 
-    def propagate_backward(self, image, target, reg_strength, learning_rate, momentum, debug):
+    def propagate_backward(self, image_batch, target, reg_strength, learning_rate, momentum, debug):
         """ Propagate error back through network, updating weights """
-        activations = self.propagate_forward(image)
+        activations = self.propagate_forward(image_batch)
         delta = activations[-1] - target
         if debug:
             print(sum(delta))
         for i in reversed(range(len(self.layers))):
             dW = np.dot(activations[i].T, delta) + (reg_strength * self.layers[i].weights)
-            dB = np.sum(delta, axis=0, keepdims=True)
-            self.layers[i].weights -= (learning_rate * dW)
+            dB = np.sum(delta, axis=0, keepdims=True) 
+            self.layers[i].weights += self.layers[i].nesterov_momentum(momentum, learning_rate, dW)
             self.layers[i].biases -= (learning_rate * dB)
             delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
                                                                 activations[i], True)
@@ -67,9 +67,9 @@ class ClassificationNetwork:
     def get_prediction(self,image):
         return self.propagate_forward(image)[-1]
     
-    def propagate_forward(self, image):
+    def propagate_forward(self, image_batch):
         """ Runs network forward and returns activations from layers """
-        activation = [np.reshape(image,(1,image.shape[0]))]
+        activation = [image_batch]
         for layer in self.layers[:-1]:
             activation.append(self.__activation_function(self, np.dot(activation[-1] ,\
                                                 layer.weights ) + layer.biases))
