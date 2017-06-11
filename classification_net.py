@@ -51,8 +51,8 @@ class ClassificationNetwork:
         for i in reversed(range(len(self.layers))):
             dW = np.dot(activations[i].T, delta) + (reg_strength * self.layers[i].weights)
             dB = np.sum(delta, axis=0, keepdims=True) 
-            self.layers[i].weights += self.layers[i].nesterov_momentum(momentum, learning_rate, dW)
-            self.layers[i].biases -= (learning_rate * dB)
+            self.layers[i].weights += self.layers[i].nesterov_momentum_weight(momentum, learning_rate, dW)
+            self.layers[i].biases += self.layers[i].nesterov_momentum_bias(momentum, learning_rate, dB)
             delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
                                                                 activations[i], True)
 
