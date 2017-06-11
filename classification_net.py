@@ -38,7 +38,8 @@ class ClassificationNetwork:
             dB = np.sum(delta, axis = 0, keepdims=True)
             self.layers[i].weights -= (self.__learning_rate * dW)
             self.layers[i].biases -= (self.__learning_rate * dB)
-            delta = delta * self.__activation_function(activations[i-1], True)
+            delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
+                                                                activations[i-1], True)
 
     def get_prediction(self,image):
         return np.around(self.propagate_forward(image_data)[-1])
