@@ -71,8 +71,8 @@ class ClassificationNetwork:
         """ Runs network forward and returns activations from layers """
         activation = [image_batch]
         for layer in self.layers[:-1]:
-            activation.append(self.__activation_function(self, np.dot(activation[-1] ,\
-                                                layer.weights ) + layer.biases))
+            activation.append(self.__activation_function(np.dot(activation[-1] ,\
+                                                layer.weights) + layer.biases))
         #Softmax activation in last layer for best results
         activation.append(self.softmax(np.dot(activation[-1], self.layers[-1].weights) + \
                                                 self.layers[-1].biases))
