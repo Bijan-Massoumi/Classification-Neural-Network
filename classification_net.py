@@ -9,7 +9,7 @@ class ClassificationNetwork:
 
             i.e. [5, 20, 1], would have an input layer of 5 nodes, hidden layer of 20 nodes,
                 and output layer of 1 node.
-        
+
 
         activation_function is a delegate to an activation function used for forward propagation.
 
@@ -29,7 +29,7 @@ class ClassificationNetwork:
     def serialize_network(self, path):
         with open(path, "wb") as f:
             pickle.dump(self.layers, f)
-    
+
     def train_network(self, images, targets, epochs, reg_strength, learning_rate, batch_size, momentum, debug):
         for epoch in range(epochs):
             sample = np.random.permutation(images.shape[0])
@@ -50,7 +50,7 @@ class ClassificationNetwork:
             print(sum(delta))
         for i in reversed(range(len(self.layers))):
             dW = np.dot(activations[i].T, delta) + (reg_strength * self.layers[i].weights)
-            dB = np.sum(delta, axis=0, keepdims=True) 
+            dB = np.sum(delta, axis=0, keepdims=True)
             self.layers[i].weights += self.layers[i].nesterov_momentum_weight(momentum, learning_rate, dW)
             self.layers[i].biases += self.layers[i].nesterov_momentum_bias(momentum, learning_rate, dB)
             delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
@@ -60,13 +60,13 @@ class ClassificationNetwork:
         correct = 0
         for i in range(test_images.shape[0]):
             prediction = self.get_prediction(test_images[i,:])
-            prediction = (prediction > threshold).astype(int)
+            prediction = (prediction > threshold).astype(int)[0]
             correct += np.array_equal(prediction, test_targets[i,:]) * 1.
         return correct/test_images.shape[0]
 
     def get_prediction(self,image):
         return self.propagate_forward(image)[-1]
-    
+
     def propagate_forward(self, image_batch):
         """ Runs network forward and returns activations from layers """
         activation = [image_batch]
@@ -77,8 +77,7 @@ class ClassificationNetwork:
         activation.append(self.softmax(np.dot(activation[-1], self.layers[-1].weights) + \
                                                 self.layers[-1].biases))
         return activation
-    
+
     def softmax(self, z):
         exp_result = np.exp(z)
         return (exp_result / np.sum(exp_result, axis=1, keepdims=True))
-    

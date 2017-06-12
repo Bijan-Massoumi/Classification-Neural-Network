@@ -11,6 +11,18 @@ def load_images(filename):
             y[i] = np.array(get_correct_target(int(f[i][0])),dtype = 'float64')
         return np.array(images), np.array(y)
 
+def partition_set(portion,images,targets):
+    dividing_index = portion * targets.shape[0]
+    image_train = images[:dividing_index]
+    target_train = targets[:dividing_index]
+
+    image_test = images[dividing_index:]
+    target_test = targets[dividing_index:]
+
+    return image_train,target_train,image_test,target_test
+
+
+
 
 
 def get_correct_target(num):
