@@ -14,9 +14,6 @@ class Activations(Enum):
             return np.tanh(z)
     def relu(z, derivate = False):
         if derivate:
-            if z < 0:
-                return 0.
-            else:
-                return 1.
+            return (1. * (z > 0))
         else:
-            return max(0., z)
+            return np.maximum(z,0)
