@@ -12,7 +12,7 @@ def load_images(filename):
         return np.array(images), np.array(y)
 
 def partition_set(portion,images,targets):
-    dividing_index = portion * targets.shape[0]
+    dividing_index = int(portion * targets.shape[0])
     image_train = images[:dividing_index]
     target_train = targets[:dividing_index]
 

@@ -49,18 +49,19 @@ class ClassificationNetwork:
         if debug:
             print(sum(delta))
         for i in reversed(range(len(self.layers))):
-            dW = np.dot(activations[i].T, delta) + (reg_strength * self.layers[i].weights)
+            dW = np.dot(activations[i].T, delta) - (reg_strength * self.layers[i].weights)
             dB = np.sum(delta, axis=0, keepdims=True)
             self.layers[i].weights += self.layers[i].nesterov_momentum_weight(momentum, learning_rate, dW)
             self.layers[i].biases += self.layers[i].nesterov_momentum_bias(momentum, learning_rate, dB)
             delta = np.dot(delta, self.layers[i].weights.T) * self.__activation_function(\
                                                                 activations[i], True)
 
-    def compute_accuracy(self, test_images, test_targets, threshold = 0.5):
+    def compute_accuracy(self, test_images, test_targets):
         correct = 0
         for i in range(test_images.shape[0]):
-            prediction = self.get_prediction(test_images[i,:])
-            prediction = (prediction > threshold).astype(int)[0]
+            fwd = self.get_prediction(test_images[i,:])[0]
+            prediction = np.zeros_like(fwd, dtype=np.float)
+            prediction[np.where(fwd==np.max(fwd))] = 1
             correct += np.array_equal(prediction, test_targets[i,:]) * 1.
         return correct/test_images.shape[0]
 
